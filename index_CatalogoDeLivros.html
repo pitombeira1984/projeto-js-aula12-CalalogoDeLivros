@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Livros</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #fff;
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background-color: #ff6347;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-left: 1rem;
+        }
+        button:hover {
+            background-color: #ff4500;
+        }
+        .edit-button {
+            background-color: #4CAF50;
+        }
+        .edit-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Catálogo de Livros</h1>
+    <input type="text" id="tituloInput" placeholder="Título do Livro">
+    <input type="text" id="autorInput" placeholder="Autor">
+    <input type="text" id="generoInput" placeholder="Gênero">
+    <input type="text" id="anoInput" placeholder="Ano de Publicação">
+    <input type="number" id="avaliacaoInput" placeholder="Avaliação do Usuário 0-5" min="0" max="5">
+    <button onclick="addBook()">Adicionar</button>
+    <button onclick="downloadJSON()">Baixar JSON</button>
+    <input type="text" id="searchInput" placeholder="Buscar por título" onkeyup="searchBook()">
+    <ul id="bookList"></ul>
+
+    <script>
+        let books = [];
+
+        function addBook() {
+            const tituloInput = document.getElementById('tituloInput').value.trim();
+            const autorInput = document.getElementById('autorInput').value.trim();
+            const generoInput = document.getElementById('generoInput').value.trim();
+            const anoInput = document.getElementById('anoInput').value.trim();
+            const avaliacaoInput = document.getElementById('avaliacaoInput').value.trim();
+
+            if (tituloInput && autorInput && generoInput && anoInput && avaliacaoInput) {
+                const book = {
+                    titulo: tituloInput,
+                    autor: autorInput,
+                    genero: generoInput,
+                    ano: anoInput,
+                    avaliacao: avaliacaoInput
+                };
+                books.push(book);
+                displayBook(book);
+                clearInputs();
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
+        }
+
+        function displayBook(book) {
+            const bookList = document.getElementById('bookList');
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>Título:</strong> ${book.titulo}<br>
+                            <strong>Autor:</strong> ${book.autor}<br>
+                            <strong>Gênero:</strong> ${book.genero}<br>
+                            <strong>Ano:</strong> ${book.ano}<br>
+                            <strong>Avaliação:</strong> ${book.avaliacao}`;
+
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Editar';
+            editButton.classList.add('edit-button');
+            editButton.addEventListener('click', function() {
+                editBook(book, li);
+            });
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Excluir';
+            deleteButton.addEventListener('click', function() {
+                deleteBook(book, li);
+            });
+
+            li.appendChild(editButton);
+            li.appendChild(deleteButton);
+            bookList.appendChild(li);
+        }
+
+        function deleteBook(book, li) {
+            const bookList = document.getElementById('bookList');
+            bookList.removeChild(li);
+            books = books.filter(b => b !== book);
+        }
+
+        function editBook(book, li) {
+            document.getElementById('tituloInput').value = book.titulo;
+            document.getElementById('autorInput').value = book.autor;
+            document.getElementById('generoInput').value = book.genero;
+            document.getElementById('anoInput').value = book.ano;
+            document.getElementById('avaliacaoInput').value = book.avaliacao;
+            deleteBook(book, li);
+        }
+
+        function searchBook() {
+            const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+            const bookList = document.getElementById('bookList');
+            bookList.innerHTML = '';
+            books.filter(book => book.titulo.toLowerCase().includes(searchInput)).forEach(displayBook);
+        }
+
+        function clearInputs() {
+            document.getElementById('tituloInput').value = '';
+            document.getElementById('autorInput').value = '';
+            document.getElementById('generoInput').value = '';
+            document.getElementById('anoInput').value = '';
+            document.getElementById('avaliacaoInput').value = '';
+        }
+
+        function downloadJSON() {
+            const dataStr = JSON.stringify(books, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "catalogo_livros.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
+
